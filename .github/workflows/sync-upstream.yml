@@ -36,7 +36,7 @@ jobs:
       - name: Check breaking update policy
         id: breaking_guard
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTIONS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
           UPSTREAM_REPO: MarSeventh/CloudFlare-ImgBed
           UPSTREAM_BRANCH: main
           ALLOW_BREAKING_UPDATE: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_breaking_update == true }}
@@ -50,19 +50,19 @@ jobs:
           upstream_sync_repo: MarSeventh/CloudFlare-ImgBed
           upstream_sync_branch: main
           target_sync_branch: main
-          target_repo_token: ${{ secrets.GITHUB_TOKEN }}
+          target_repo_token: ${{ secrets.ACTIONS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
           test_mode: false
 
       - name: Complete breaking update notices
         if: steps.sync.outcome == 'success'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTIONS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
         run: bash .github/breaking-updates/scripts/breaking-update-guard.sh complete
 
       - name: Trigger Worker deploy
         if: steps.sync.outcome == 'success'
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.ACTIONS_SYNC_TOKEN || secrets.GITHUB_TOKEN }}
         run: gh workflow run deploy-worker.yml --repo "${{ github.repository }}" --ref main
 
       - name: Sync failure guidance
